@@ -22,7 +22,7 @@ public class ChessMatch {
         initialState();
     }
 
-    public ChessPlayer getCurrentPlayer() {
+    public ChessPlayer getCurrentPlayer(){
         return currentPlayer;
     }
 
@@ -56,13 +56,18 @@ public class ChessMatch {
             }
 
             board.movePiece(piece, target);
+
             currentPlayer.updateTargets(this.board);
+            enemyPlayer().updateTargets(this.board);
+
+            kingInCheck();
 
             if (currentPlayer.isInCheck()) {
                 board.undoMove(piece, source);
                 showAlert("Invalid move!", "King still in check!");
             } else {
                 changePlayer();
+                kingInCheck();
             }
         } else {
             System.out.println("Invalid move");
@@ -71,7 +76,6 @@ public class ChessMatch {
 
 
     private boolean validateMovement(Position target, ChessPiece piece) {
-        kingInCheck();
         boolean[][] possibleMoves = piece.possibleMoves(board);
         return possibleMoves[target.getRow()][target.getColumn()];
     }
@@ -143,13 +147,17 @@ public class ChessMatch {
                     if (currentPlayer.king().getPosition().equals(pos)) {
                         currentPlayer.setInCheck(true);
                         isCheckmate();
+                        return;
                     }
                 }
             }
         }
-    }
+        currentPlayer.setInCheck(false);
+    };
 
     private void isCheckmate() {
+        boolean[][] enemyTargets = enemyPlayer().getTargets();
+
         ChessPiece king = currentPlayer.king();
 
         // verify if king can escape by own move
@@ -157,23 +165,7 @@ public class ChessMatch {
         for (int row = 0; row < board.getRows(); row++) {
             for (int column = 0; column < board.getColumns(); column++) {
                 if (kingMoves[row][column]) {
-                    Position target = new Position(row, column);
-
-                    // simulates king move
-                    Position source = king.getPosition();
-                    board.movePiece(king, target);
-
-                    // update enemy move
-                    enemyPlayer().updateTargets(board);
-
-                    // verify if still in check
-                    boolean stillInCheck = currentPlayer.isInCheck();
-
-                    // undo move
-                    board.undoMove(king, source);
-
-                    // if king can escape
-                    if (!stillInCheck) {
+                    if(!enemyTargets[row][column]) {
                         return;
                     }
                 }

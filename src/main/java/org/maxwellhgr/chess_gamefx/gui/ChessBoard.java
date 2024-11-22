@@ -11,6 +11,8 @@ import org.maxwellhgr.chess_gamefx.chess.ChessMatch;
 import org.maxwellhgr.chess_gamefx.chess.ChessPiece;
 import org.maxwellhgr.chess_gamefx.chess.ChessPosition;
 
+import static org.maxwellhgr.chess_gamefx.gui.util.Alerts.showAlert;
+
 public class ChessBoard extends GridPane {
 
     private ChessPosition selectedPosition;
@@ -74,6 +76,9 @@ public class ChessBoard extends GridPane {
             selectedPosition = null;
             refreshBoard();
 
+            if(match.getCurrentPlayer().isInCheck()){
+                showAlert("Check!", match.getCurrentPlayer().getColor() + " king is in check!");
+            }
         }
     }
 
